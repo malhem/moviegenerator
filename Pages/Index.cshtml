@@ -1,0 +1,30 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+    <div class="container" id="containerBody">
+        <div id="content">
+          <div>
+              <h1>@Model.CurrentMovie?.Title (@Model.CurrentMovie?.Date) @Model.CurrentMovie?.Rating⭐</h1>
+              <p>@Model.CurrentMovie?.Summary</p>
+              <div id="imgAndBtn">
+                <p><strong>Streaming availability (SE):</strong><br> @foreach (var item in Model.StreamingServices)
+                {
+                  <img src="@item" class="services">
+                }
+                </p>
+                <a id="btn" asp-page="Index">New Movie</a>
+              </div>
+          </div>
+        </div>
+        <img id="poster" src="@Model.CurrentMovie?.Poster" alt="Poster for: @Model.CurrentMovie?.Title">
+    </div>
+
+<script>
+  const container = document.getElementById("containerBody");
+  window.onload = function() {
+    container.style.opacity = '1';
+  }
+</script>

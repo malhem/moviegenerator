@@ -1,0 +1,93 @@
+
+html, body {
+  font-size: 14px;
+  height: 100%;
+  width: 100%;
+  background-image: linear-gradient(#BDEEBB, #CA6822);
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
+
+#btn {
+  text-decoration: none;
+  display: inline-block;
+  background-color: #b17b47;
+  border-radius: 4px;
+  padding: 8px 16px;
+  font-size: 16px;
+  border-bottom: 4px solid #8f6239;
+  font-weight: 700;
+  color: rgb(0, 0, 0);
+}
+
+#btn:hover {
+  background-color: #da9657;
+  border-bottom: 4px solid #be834c;
+}
+
+#containerBody {
+  display: flex;
+  flex-wrap: wrap;
+  height: 90%;
+  width: 100%;
+  gap: 10px;
+  overflow: scroll;
+  opacity: 0;
+  transition: opacity 1s;
+}
+
+#content {
+  flex: 1 1 350px;
+  min-width: 0;
+  text-align: left;
+}
+
+h1 {
+  margin-bottom: 10px;
+}
+
+#poster {
+  display: block;
+  flex: 1 1 250px;
+  min-width: 0;
+  max-height: 100%;
+  border-radius: 10px;
+}
+
+#tmdbLogo {
+  display: block;
+  width: 40%;
+}
+
+nav {
+  background-image: linear-gradient(0deg, #89b389, #bb6a2f);
+  border-bottom: 1px solid black;
+}
+
+.nav-item a:active{
+  font-weight: bold;
+}
+
+.services {
+  height: 40px;
+  width: 40px;
+}
+
+#imgAndBtn {
+  width: 100%;
+}
+
+@media screen and (max-width: 768px) {
+  #imgAndBtn {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+
+
