@@ -2,142 +2,104 @@
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json.Linq;
-using System.Text.Json;
+using Newtonsoft.Json;
 
 namespace movieGenerator.Pages;
 
 public class IndexModel : PageModel
 {
     private readonly ILogger<IndexModel> _logger;
-    private readonly IConfiguration _config;
     private readonly HttpClient _httpClient;
-    private readonly IMemoryCache _cache;
-    private List<Movie> _movies;
     private readonly string _apiKey;
-    private dynamic? movieData;
-    private int currentPage = 1;
 
-    public List<string> StreamingServices { get; private set; }
-    public Movie? CurrentMovie { get; private set; } 
+    private static List<Movie> _topMovieList = new List<Movie>();
+    private static List<Movie> _popMovieList = new List<Movie>();
+    private static int currentPage = 0;
+
+    public static readonly string imagePath = "https://image.tmdb.org/t/p/original";
+    public static List<string> streamingServices = new List<string>();
+    public static Movie? currentMovie = null;
+    public static string filter = "top_rated";
     
-    public IndexModel(ILogger<IndexModel> logger, IConfiguration config, IHttpClientFactory httpClientFactory, IMemoryCache cache)
+    public IndexModel(ILogger<IndexModel> logger, IConfiguration config, IHttpClientFactory httpClientFactory)
     {
         _logger = logger;
-        _config = config;
         _httpClient = httpClientFactory.CreateClient();
-        _movies = new List<Movie>();
-        _apiKey = _config["ApiKey"]!;
-        _cache = cache;
-        StreamingServices = new List<string>();
-        CurrentMovie = null;
+        _apiKey = config["ApiKey"]!;
     }
-
+    
+    public void OnGetUpdateFilter(string _filter)
+    {
+        filter = _filter;
+    }
     public async Task<IActionResult> OnGet()
     {
-        await ShowMovie();
+        await GetMovie();
         return Page();
     }
-    private async Task ShowMovie()
-    {
-        CurrentMovie = await GetMovie();
-        if(CurrentMovie is null)
-        {
-            CurrentMovie = await GetMovie();
-        }
-    }
 
-    private async Task<Movie> GetMovie()
+    private async Task GetMovie()
     {
         try
         {
-            if (_movies.Count >= 20 * currentPage)
+            var movieList = filter == "top_rated" ? _topMovieList : _popMovieList;
+
+            if (movieList.Count == 0)
             {
                 currentPage++;
-                movieData = null;
+                currentMovie = null;
             }
 
-            if (movieData == null)
+            if (currentMovie is null)
             {
-                string url = $"https://api.themoviedb.org/3/movie/top_rated?api_key={_apiKey}&language=en-US&page=" + currentPage;
-
-                var response = await _httpClient.GetStringAsync(url);
-                movieData = JObject.Parse(response)["results"]!;
+                string url = $"https://api.themoviedb.org/3/movie/{filter}?api_key={_apiKey}&language=en-US&page=" + currentPage;
+                
+                var json = await _httpClient.GetStringAsync(url);
+                var jsonObj = JObject.Parse(json);
+                var results = JArray.Parse(jsonObj["results"]!.ToString());
+                
+                foreach(var result in results)
+                {
+                    Movie movie = JsonConvert.DeserializeObject<Movie>(result.ToString())!;
+                    movieList.Add(movie);
+                }
             }
 
-            int count = movieData.Count;
-            var rand = new Random();
-            int i = rand.Next(count);
+            Random rand = new Random();
+            int i = rand.Next(movieList.Count);
 
-            foreach(Movie m in _movies)
-            {
-                if (m.Id == (int)movieData[i].id) return await GetMovie();
-            }
+            currentMovie = movieList[i];
+            movieList.Remove(currentMovie);
 
-            Movie movie = new Movie
-            (
-                (int)movieData[i].id,
-                (string)movieData[i].title,
-                (double)movieData[i].vote_average,
-                ((string)movieData[i].release_date).Remove(4),
-                (string)movieData[i].overview,
-                "https://image.tmdb.org/t/p/original" + (string)movieData[i].poster_path
-            );
-
-            _movies.Add(movie);
-            await GetStreamingServices(movie.Id);
-
-            return movie;
+            await GetStreamingServices(currentMovie!.Id);
         }
         catch (HttpRequestException ex)
         {
             _logger.LogError("HTTP error occurred: {ErrorMessage}", ex.Message);
-            return null!;
         }
-        catch (JsonException ex)
+        catch (Newtonsoft.Json.JsonException ex)
         {
             _logger.LogError("JSON deserialization error occurred: {ErrorMessage}", ex.Message);
-            return null!;
         }
         catch (Exception ex)
         {
             _logger.LogError("An error occurred: {ErrorMessage}", ex.Message);
-            return null!;
         }
     }
 
     private async Task GetStreamingServices(int id)
     {
-        StreamingServices.Clear();
-
-        string cacheKey = $"streaming_{id}";
-        if (_cache.TryGetValue(cacheKey, out List<string>? cachedStreamingServices))
-        {
-            StreamingServices = cachedStreamingServices!;
-            return;
-        }
+        streamingServices.Clear();
         
         string url = $"https://api.themoviedb.org/3/movie/{id}/watch/providers?api_key={_apiKey}";
         var response = await _httpClient.GetStringAsync(url);
 
-        dynamic streamingData = JObject.Parse(response)["results"]!;
-        if (streamingData is null) return;
+        var streamingData = JObject.Parse(response)["results"]!["SE"]!["flatrate"]!;
 
-        dynamic streamingDataSE = streamingData["SE"]!;
-        if (streamingDataSE is null) return;
-
-        dynamic flatRateStreamingDataSE = streamingDataSE["flatrate"];
-        if (flatRateStreamingDataSE is null) return;
-
-        if(flatRateStreamingDataSE is null) return;
-
-        foreach(var item in flatRateStreamingDataSE)
+        foreach(var item in streamingData)
         {
-            if(item["logo_path"] is null) return;
-
             string fullPath = "https://image.tmdb.org/t/p/original" + item["logo_path"];
-            StreamingServices.Add(fullPath);
+            streamingServices.Add(fullPath);
         }
-
-        _cache.Set(cacheKey, StreamingServices, TimeSpan.FromMinutes(5));
     }
 }

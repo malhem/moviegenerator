@@ -1,24 +1,23 @@
-using System.ComponentModel.DataAnnotations;
-using System.Drawing;
 namespace movieGenerator;
+using Newtonsoft.Json;
 
 public class Movie
 {
-    public Movie(int id, string title, double rating, 
-                string date, string summary, string poster)
-    {
-        Id = id;
-        Title = title;
-        Rating = rating;
-        Date = date;
-        Summary = summary;
-        Poster = poster;
-    }
+    [JsonProperty("id")]
+    public int Id { get; set; }
 
-    public int Id {get; init; }
-    public string Title {get; init; }
-    public double Rating {get; init; }
-    public string Date {get; init; }
-    public string Summary {get; init; }
-    public string Poster {get; init; }
+    [JsonProperty("title")]
+    public string? Title { get; set; }
+
+    [JsonProperty("vote_average")]
+    public double Rating { get; set; }
+
+    [JsonProperty("release_date")]
+    public string? Date { get; set; }
+
+    [JsonProperty("overview")]
+    public string? Summary { get; set; }
+
+    [JsonProperty("poster_path")]
+    public string? Poster { get; set; }
 }

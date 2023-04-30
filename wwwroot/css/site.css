@@ -1,9 +1,11 @@
 
 html, body {
   font-size: 14px;
+  color: #f2f2f2;
   height: 100%;
   width: 100%;
-  background-image: linear-gradient(#BDEEBB, #CA6822);
+  /* background-image: linear-gradient(#BDEEBB, #CA6822); */
+  background-color: #27272c;
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
@@ -15,18 +17,18 @@ html, body {
 #btn {
   text-decoration: none;
   display: inline-block;
-  background-color: #b17b47;
+  background-color: #77777a;
   border-radius: 4px;
   padding: 8px 16px;
   font-size: 16px;
-  border-bottom: 4px solid #8f6239;
+  border-bottom: 4px solid #484848;
   font-weight: 700;
-  color: rgb(0, 0, 0);
+  color: #f2f2f2;
 }
 
 #btn:hover {
-  background-color: #da9657;
-  border-bottom: 4px solid #be834c;
+  background-color: #8e8e8e;
+  border-bottom: 4px solid #606060;
 }
 
 #containerBody {
@@ -64,12 +66,21 @@ h1 {
 }
 
 nav {
-  background-image: linear-gradient(0deg, #89b389, #bb6a2f);
+  background-color: #1d1d20;
   border-bottom: 1px solid black;
+}
+
+.nav-item a{
+  color: #f2f2f2 !important;
 }
 
 .nav-item a:active{
   font-weight: bold;
+}
+
+.navbar-toggler {
+  background-color: #f2f2f29a !important;
+  border: 1px solid #f2f2f2 !important;
 }
 
 .services {
@@ -81,13 +92,25 @@ nav {
   width: 100%;
 }
 
+label {
+  font-size: 20px;
+  margin: 0px 10px 5px 0px;
+}
+
+input[type="radio"] {
+  height: 1.2rem;
+  width: 1.2rem;
+  margin-right: 5px;
+}
+
 @media screen and (max-width: 768px) {
   #imgAndBtn {
     display: flex;
     justify-content: space-between;
     align-items: center;
   }
+
+  .container {
+    padding: 0px 20px 0px 20px;
+  }
 }
-
-
-

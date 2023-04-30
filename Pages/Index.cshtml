@@ -7,24 +7,46 @@
     <div class="container" id="containerBody">
         <div id="content">
           <div>
-              <h1>@Model.CurrentMovie?.Title (@Model.CurrentMovie?.Date) @Model.CurrentMovie?.Rating⭐</h1>
-              <p>@Model.CurrentMovie?.Summary</p>
-              <div id="imgAndBtn">
-                <p><strong>Streaming availability (SE):</strong><br> @foreach (var item in Model.StreamingServices)
-                {
-                  <img src="@item" class="services">
-                }
-                </p>
-                <a id="btn" asp-page="Index">New Movie</a>
-              </div>
+            <label><input type="radio" name="filter" id="popularity" onclick='updateFilter("popular")'>Popularity</label>
+            <label><input type="radio" name="filter" id="rating" onclick='updateFilter("top_rated")' checked>Rating</label>
+            <h1>@IndexModel.currentMovie?.Title (@IndexModel.currentMovie?.Date?.Remove(4)) @IndexModel.currentMovie?.Rating⭐</h1>
+            <p>@IndexModel.currentMovie?.Summary</p>
+            <div id="imgAndBtn">
+              <p><strong>Streaming availability (SE):</strong><br> @foreach (var item in IndexModel.streamingServices)
+              {
+                <img src="@item" class="services">
+              }
+              </p>
+              <a id="btn" asp-page="Index">New Movie</a>
+            </div>
           </div>
         </div>
-        <img id="poster" src="@Model.CurrentMovie?.Poster" alt="Poster for: @Model.CurrentMovie?.Title">
+        <img id="poster" src="@IndexModel.imagePath@IndexModel.currentMovie?.Poster" alt="Poster for: @IndexModel.currentMovie?.Title">
     </div>
 
 <script>
   const container = document.getElementById("containerBody");
   window.onload = function() {
     container.style.opacity = '1';
+
+    if(document.getElementById('popularity').checked) {
+      updateFilter('popular');
+    } else updateFilter('top_rated')
+  }
+
+  function updateFilter(filter) {
+    // Store the selected radio button value in local storage
+    localStorage.setItem('selectedFilter', filter);
+
+    // Make a fetch request to update the filter on the server
+    fetch(`?handler=UpdateFilter&_filter=${filter}`)
+  }
+
+  const selectedFilter = localStorage.getItem('selectedFilter');
+  
+  if (selectedFilter === 'popular') {
+    document.getElementById('popularity').checked = true;
+  } else if (selectedFilter === 'top_rated') {
+    document.getElementById('rating').checked = true;
   }
 </script>
